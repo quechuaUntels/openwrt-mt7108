@@ -1,0 +1,118 @@
+// mt7108.dtsi - Arquitectura SoC MediaTek ARM9 (Revisión Final Dic 2025)
+
+/ {
+	compatible = "mediatek,mt7108";
+	#address-cells = <1>;
+	#size-cells = <1>;
+	interrupt-parent = <&intc>;
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		cpu@0 {
+			device_type = "cpu";
+			compatible = "arm,arm926ejs";
+			reg = <0>;
+		};
+	};
+
+	aliases {
+		serial0 = &uart1; /* ttyS1 en el log original es la consola */
+		serial1 = &uart0;
+		gpio0 = &pio;
+	};
+
+	/* Relojes base: el log reporta ahb_clk=61.6MHz */
+	clocks {
+		uart_clk: uart_clk {
+			compatible = "fixed-clock";
+			#clock-cells = <0>;
+			clock-frequency = <14745600>; /* Frecuencia estándar para UART 16550 */
+		};
+	};
+
+	soc {
+		compatible = "simple-bus";
+		ranges;
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		/* Controlador de Interrupciones Central */
+		intc: interrupt-controller@80000000 {
+			compatible = "mediatek,mt7108-intc", "mediatek,mt_cirq";
+			reg = <0x80000000 0x1000>;
+			interrupt-controller;
+			#interrupt-cells = <1>;
+		};
+
+		/* Controlador de Pines GPIO (Confirmado en log ledbutton) */
+		pio: gpio-controller@80001000 {
+			compatible = "mediatek,mt7108-gpio";
+			reg = <0x80001000 0x1000>;
+			gpio-controller;
+			#gpio-cells = <2>;
+			interrupt-controller;
+			#interrupt-cells = <2>;
+			interrupt-parent = <&intc>;
+			interrupts = <10>; /* IRQ maestra GPIO */
+		};
+
+		/* NAND Controller: El bus EBI que hallaste en el hex */
+		nand: nand-controller@80020000 {
+			compatible = "mediatek,mt7108-nand";
+			reg = <0x80020000 0x1000>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "disabled";
+		};
+
+		/* UART 1: Consola Principal (irq 7 confirmada) */
+		uart1: serial@800a0000 {
+			compatible = "ns16550a";
+			reg = <0x800a0000 0x1000>;
+			interrupts = <7>;
+			reg-shift = <2>;
+			clocks = <&uart_clk>;
+			status = "disabled";
+		};
+
+		/* UART 0: Puerto secundario (irq 8 confirmada) */
+		uart0: serial@800b0000 {
+			compatible = "ns16550a";
+			reg = <0x800b0000 0x1000>;
+			interrupts = <8>;
+			reg-shift = <2>;
+			clocks = <&uart_clk>;
+			status = "disabled";
+		};
+
+		/* Controlador PCI: Confirmado en log iomem */
+		pcie: pcie@84000000 {
+			compatible = "mediatek,mt7108-pcie";
+			device_type = "pci";
+			reg = <0x84000000 0x1000>;
+			#address-cells = <3>;
+			#size-cells = <2>;
+			ranges = <0x01000000 0 0x00000000 0x84001000 0 0x00001000>,
+				 <0x02000000 0 0x84100000 0x84100000 0 0x00700000>,
+				 <0x42000000 0 0x84800000 0x84800000 0 0x00800000>;
+			status = "disabled";
+		};
+
+		/* USB MUSB: Dirección e IRQ 13 confirmadas */
+		usb: usb@86000000 {
+			compatible = "mg,musbmhdrc";
+			reg = <0x86000000 0x1000>;
+			interrupts = <13>;
+			status = "disabled";
+		};
+
+		/* Ethernet Star: Dirección 89000000 hallada en el hex de star_ether */
+		ethernet: ethernet@89000000 {
+			compatible = "mediatek,mt7108-eth", "star,ether";
+			reg = <0x89000000 0x10000>;
+			interrupts = <5>;
+			status = "disabled";
+		};
+	};
+};
