@@ -79,7 +79,15 @@ jobs:
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
-
+      
+    - name: Cache
+      uses: actions/cache@v4
+      with:
+        path: /workdir/openwrt/staging_dir
+        key: ${{ runner.os }}-openwrt-staging-${{ hashFiles('/workdir/openwrt/include/toplevel.mk') }}
+        restore-keys: |
+          ${{ runner.os }}-openwrt-staging-
+          
     - name: Load custom configuration
       run: |
         # 1. Inyectar archivos personalizados (DTS, scripts, etc.) sobre el código fuente
@@ -149,7 +157,7 @@ jobs:
       run: |
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         touch release.txt
-        [ ${UPLOAD_GOFILE} = true && ${{ steps.gofile.outputs.url }} ] && echo "🔗 [GoFile](${{ steps.gofile.outputs.url }})" >> release.txt
+        echo "Firmware para MT7108 (Seowon SWC9000) compilado en 2025" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload firmware to release
