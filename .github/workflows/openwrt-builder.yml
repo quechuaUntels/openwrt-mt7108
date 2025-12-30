@@ -72,11 +72,19 @@ jobs:
 
     - name: Load custom configuration
       run: |
-        [ -e files ] && mv files openwrt/files
+        # 1. Inyectar archivos personalizados (DTS, scripts, etc.) sobre el código fuente
+        [ -e files ] && cp -rf files/* openwrt/
+        
+        # 2. Cargar el archivo .config si existe
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        
+        # 3. Dar permisos y ejecutar script secundario (opcional)
         chmod +x $DIY_P2_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
+        
+        # 4. Generar configuración final
+        make defconfig
 
     - name: Download package
       id: package
