@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# $GITHUB_WORKSPACE es la ruta real de tu repositorio en la nube
-RR="$GITHUB_WORKSPACE"
+# 1. Definir la ruta del repositorio (un nivel arriba de donde estamos)
+RR="$(dirname "$PWD")"
 
 # 1. PREPARACIÓN DE RUTAS
 # Creamos las carpetas necesarias para el hardware y el firmware de la radio
@@ -15,6 +15,9 @@ if [ -f $RR/hw/rt2870.bin ]; then
     cp -f "$RR/hw/rt2870.bin" files/etc/Wireless/RT2870AP/rt2870.bin
     # Copia a la ruta estándar (OpenWrt 2026)
     cp -f "$RR/hw/rt2870.bin" files/lib/firmware/rt2870.bin
+else
+    echo "ERROR CRÍTICO: No se encontró el archivo de configuración en $RR"
+    exit 1
 fi
 
 # 1. Inyectar archivos usando la ruta absoluta del workspace
