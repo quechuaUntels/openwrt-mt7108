@@ -102,7 +102,7 @@ jobs:
         # 3. Ejecutar tu script DIY dándole la ruta de tu repo como argumento
         chmod +x $DIY_P2_SH
         cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P2_SH $GITHUB_WORKSPACE
+        $GITHUB_WORKSPACE/$DIY_P2_SH
 
     - name: Download package
       id: package
