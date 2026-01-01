@@ -40,7 +40,11 @@ MAKEFILE="target/linux/gemini/image/Makefile"
 if [ -f "$FRAG" ] && [ -f "$MAKEFILE" ]; then
     if ! grep -q "seowon_swc9000" "$MAKEFILE"; then
         echo "Inyectando perfil seowon_swc9000 en $MAKEFILE..."
-        cat "$FRAG" >> "$MAKEFILE"
+        # cat "$FRAG" >> "$MAKEFILE"
+	# Busca la línea del eval y coloca el fragmento JUSTO ANTES
+        sed -i '/$(eval $(call BuildImage))/i \ ' "$MAKEFILE" # Añade un espacio
+        sed -i '/$(eval $(call BuildImage))/r '$FRAG'' "$MAKEFILE"
+        echo "Inyección completada con éxito."
     else
         echo "El dispositivo ya existe en el Makefile."
     fi
