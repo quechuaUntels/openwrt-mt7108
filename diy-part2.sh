@@ -19,16 +19,26 @@
 # Modify hostname
 #sed -i 's/OpenWrt/P3TERX-Router/g' package/base-files/files/bin/config_generate
 
-# 1. Crear directorio de destino para el target Gemini (Kernel 6.6+)
+# 1. PREPARACIÓN DE RUTAS
+# Creamos las carpetas necesarias para el hardware y el firmware de la radio
 mkdir -p target/linux/gemini/dts/
+mkdir -p files/etc/Wireless/RT2870AP/
+mkdir -p files/lib/firmware/
 
-# 2. Copiar AMBOS archivos (dts y dtsi) a la carpeta del kernel
-# Es vital que ambos estén juntos para que el preprocesador los encuentre
-cp -f ../mt7108.dtsi target/linux/gemini/dts/
-cp -f ../mt7119-seowon.dts target/linux/gemini/dts/
+# 2. INYECCIÓN DE ARCHIVOS FÍSICOS
+if [ -f ../hw/rt2870.bin ]; then
+    # Copia a la ruta legacy (tu hardware)
+    cp -f ../hw/rt2870.bin files/etc/Wireless/RT2870AP/rt2870.bin
+    # Copia a la ruta estándar (OpenWrt 2026)
+    cp -f ../hw/rt2870.bin files/lib/firmware/rt2870.bin
+fi
 
-# 3. Registrar el nuevo dispositivo en el Makefile de Gemini
-# Esto crea el perfil "seowon_swc9000" para que aparezca en el menú
+[ -f ../hw/RT2870AP.dat ] && cp -f ../hw/files/RT2870AP.dat etc/Wireless/RT2870AP/RT2870AP.dat
+[ -f ../hw/mt7108.dtsi ] && cp -f ../hw/mt7108.dtsi target/linux/gemini/dts/
+[ -f ../hw/mt7119-seowon.dts ] && cp -f ../hw/mt7119-seowon.dts target/linux/gemini/dts/
+
+# 3. REGISTRO DEL DISPOSITIVO (Crucial para que coincida con seed.config)
+# Este nombre 'seowon_swc9000' debe ser idéntico al de tu seed.config
 echo "
 define Device/seowon_swc9000
   DEVICE_VENDOR := Seowon
@@ -39,6 +49,10 @@ endef
 TARGET_DEVICES += seowon_swc9000
 " >> target/linux/gemini/image/Makefile
 
-# 4. Inyectar tu configuración y forzar validación
-cat ../seed.config > .config
+# 4. LIMPIEZA Y CARGA DE CONFIGURACIÓN
+# Sustituimos cualquier configuración previa por tu seed.config íntegro
+cat ../.config > .config
+
+# 5. VALIDACIÓN NO INTERACTIVA
+# Aplicamos la configuración y forzamos que el sistema no se detenga por avisos
 make oldconfig
