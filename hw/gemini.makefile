@@ -5,3 +5,4 @@ define Device/seowon_swc9000
 	DEVICE_DTS := gemini-mt7119-seowon
 	SUPPORTED_DEVICES := seowon,swc9000
 endef
+TARGET_DEVICES += seowon_swc9000
