@@ -19,7 +19,7 @@
 # Modify hostname
 #sed -i 's/OpenWrt/P3TERX-Router/g' package/base-files/files/bin/config_generate
 # Esto imprimirá en el log toda la estructura de tu repositorio
-cat /proc/cpuinfo
+# cat /proc/cpuinfo
 echo "-------------------------------------------------------"
 echo "Listando archivos en el repositorio para verificar rutas:"
 ls -R ..
