@@ -51,7 +51,7 @@ TARGET_DEVICES += seowon_swc9000
 
 # 4. LIMPIEZA Y CARGA DE CONFIGURACIÓN
 # Sustituimos cualquier configuración previa por tu seed.config íntegro
-cat ../.config > .config
+cat ../seed.config > .config
 
 # 5. VALIDACIÓN NO INTERACTIVA
 # Aplicamos la configuración y forzamos que el sistema no se detenga por avisos
