@@ -87,20 +87,22 @@ jobs:
         key: ${{ runner.os }}-openwrt-staging-${{ hashFiles('/workdir/openwrt/include/toplevel.mk') }}
         restore-keys: |
           ${{ runner.os }}-openwrt-staging-
-          
+
     - name: Load custom configuration
       run: |
-        # 1. Mover el archivo .config maestro a la carpeta de trabajo
-        [ -e $CONFIG_FILE ] && cp -f $CONFIG_FILE openwrt/.config
+        # 1. Ver donde estamos realmente
+        echo "Ubicación actual: $PWD"
+        echo "Ubicación del Workspace: $GITHUB_WORKSPACE"
         
-        # 2. Dar permisos y ejecutar tu script DIY (que inyecta DTS y binarios)
+        # 2. Copiar archivos usando la variable de entorno de GitHub
+        # Esto busca los archivos en la raíz de TU repositorio
+        [ -e $GITHUB_WORKSPACE/seed.config ] && cp -f $GITHUB_WORKSPACE/seed.config openwrt/.config
+        [ -e $GITHUB_WORKSPACE/.config ] && cp -f $GITHUB_WORKSPACE/.config openwrt/.config
+        
+        # 3. Ejecutar tu script DIY dándole la ruta de tu repo como argumento
         chmod +x $DIY_P2_SH
         cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P2_SH
-        
-        # 3. VALIDACIÓN ESTRICTA (Filosofía Todo o Nada)
-        # Usamos oldconfig en lugar de defconfig para que respete tu .config al 100%
-        make oldconfig
+        $GITHUB_WORKSPACE/$DIY_P2_SH $GITHUB_WORKSPACE
 
     - name: Download package
       id: package
