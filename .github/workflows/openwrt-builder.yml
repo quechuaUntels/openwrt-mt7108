@@ -17,8 +17,8 @@ on:
   workflow_dispatch:
 
 env:
-  REPO_URL: https://github.com/coolsnowwolf/lede
-  REPO_BRANCH: master
+  REPO_URL: https://github.com/openwrt/openwrt.git 
+  REPO_BRANCH: openwrt-24.10
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: .config
   DIY_P1_SH: diy-part1.sh
@@ -26,7 +26,7 @@ env:
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
-  TZ: Asia/Shanghai
+  TZ: America/Lima
 
 jobs:
   build:
@@ -90,25 +90,23 @@ jobs:
           
     - name: Load custom configuration
       run: |
-        # 1. Inyectar archivos personalizados (DTS, scripts, etc.) sobre el código fuente
-        [ -e files ] && cp -rf files/* openwrt/
+        # 1. Mover el archivo .config maestro a la carpeta de trabajo
+        [ -e $CONFIG_FILE ] && cp -f $CONFIG_FILE openwrt/.config
         
-        # 2. Cargar el archivo .config si existe
-        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        
-        # 3. Dar permisos y ejecutar script secundario (opcional)
+        # 2. Dar permisos y ejecutar tu script DIY (que inyecta DTS y binarios)
         chmod +x $DIY_P2_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
         
-        # 4. Generar configuración final
-        make defconfig
+        # 3. VALIDACIÓN ESTRICTA (Filosofía Todo o Nada)
+        # Usamos oldconfig en lugar de defconfig para que respete tu .config al 100%
+        make oldconfig
 
     - name: Download package
       id: package
       run: |
         cd openwrt
-        make defconfig
+        # make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
@@ -157,7 +155,7 @@ jobs:
       run: |
         echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
         touch release.txt
-        echo "Firmware para MT7108 (Seowon SWC9000) compilado en 2025" >> release.txt
+        echo "Firmware para MT7108 (Seowon SWC9000/SWC9100/SWU9100) - MT7119A, flash (64MB), RAM (128MB) ARM9" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: Upload firmware to release
