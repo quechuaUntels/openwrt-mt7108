@@ -42,8 +42,9 @@ if [ -f "$FRAG" ] && [ -f "$MAKEFILE" ]; then
         echo "Inyectando perfil seowon_swc9000 en $MAKEFILE..."
         # cat "$FRAG" >> "$MAKEFILE"
 	# Busca la línea del eval y coloca el fragmento JUSTO ANTES
-        sed -i '/$(eval $(call BuildImage))/i \ ' "$MAKEFILE" # Añade un espacio
-        sed -i '/$(eval $(call BuildImage))/r '$FRAG'' "$MAKEFILE"
+        sed -i "/\$(eval \$(call BuildImage))/i \#jfq" "$MAKEFILE"
+        sed -i "/\#jfq/r $FRAG" "$MAKEFILE"
+
         echo "Inyección completada con éxito."
     else
         echo "El dispositivo ya existe en el Makefile."
