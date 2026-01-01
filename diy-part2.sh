@@ -18,7 +18,12 @@
 
 # Modify hostname
 #sed -i 's/OpenWrt/P3TERX-Router/g' package/base-files/files/bin/config_generate
-
+# Esto imprimirá en el log toda la estructura de tu repositorio
+cat /proc/cpuinfo
+echo "-------------------------------------------------------"
+echo "Listando archivos en el repositorio para verificar rutas:"
+ls -R ..
+echo "-------------------------------------------------------"
 # 1. PREPARACIÓN DE RUTAS
 # Creamos las carpetas necesarias para el hardware y el firmware de la radio
 mkdir -p target/linux/gemini/dts/
