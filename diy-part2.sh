@@ -77,10 +77,11 @@ if [ -f "$RR/seed.config" ]; then
     
     # Comprobación de éxito: ¿Sigue seleccionado nuestro dispositivo?
     if grep -q "CONFIG_TARGET_gemini_generic_DEVICE_seowon_swc9000=y" .config; then
-	echo "ÉXITO: Dispositivo validado y dependencias resueltas por defconfig."
+	    echo "ÉXITO: Dispositivo validado y dependencias resueltas por defconfig."
+	    make target/linux/clean
     else
         echo "ERROR: El dispositivo fue RECHAZADO por el sistema de configuración."
-	echo "Revisa que el fragmento Makefile tenga los TABULADORES correctos."
+	    echo "Revisa que el fragmento Makefile tenga los TABULADORES correctos."
         exit 1
     fi
 else
