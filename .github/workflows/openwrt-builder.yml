@@ -111,7 +111,6 @@ jobs:
         ./scripts/feeds update -a    # Actualiza feeds
         ./scripts/feeds install -a   # Instala feeds
         # Resuelve las preguntas del kernel (como REALTEK_PHY) antes de la descarga
-        # yes "" | make target/linux/refresh
         yes "" | make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
@@ -122,7 +121,7 @@ jobs:
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
-        yes "" | make target/linux/refresh
+        yes "" | make oldconfig
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
