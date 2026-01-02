@@ -108,7 +108,8 @@ jobs:
       id: package
       run: |
         cd openwrt
-        # make defconfig
+        # Resuelve las preguntas del kernel (como REALTEK_PHY) antes de la descarga
+        yes "" | make target/linux/refresh
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
