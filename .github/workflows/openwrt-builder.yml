@@ -35,20 +35,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@main
-    
-    - name: Cache Toolchain
-      uses: actions/cache@v4
-      with:
-        path: |
-            openwrt/staging_dir/host
-            openwrt/staging_dir/toolchain-*
-            openwrt/build_dir/host
-            openwrt/build_dir/toolchain-*
-        # La clave cambia si modificas el seed.config o el SoC
-        key: ${{ runner.os }}-openwrt-toolchain-${{ hashFiles('recompile.sh') }}
-        # Esto permite que si no hay cambio en recompile.txt, use la última caché
-        restore-keys: |
-            ${{ runner.os }}-openwrt-toolchain-
             
     - name: Initialization environment
       env:
@@ -81,6 +67,20 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
+    - name: Cache Toolchain
+      uses: actions/cache@v4
+      with:
+        path: |
+            openwrt/staging_dir/host
+            openwrt/staging_dir/toolchain-*
+            openwrt/build_dir/host
+            openwrt/build_dir/toolchain-*
+        # La clave cambia si modificas el seed.config o el SoC
+        key: ${{ runner.os }}-openwrt-toolchain-${{ hashFiles('recompile.sh') }}
+        # Esto permite que si no hay cambio en recompile.txt, use la última caché
+        restore-keys: |
+            ${{ runner.os }}-openwrt-toolchain-
+  
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
@@ -93,14 +93,6 @@ jobs:
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
-      
-    - name: Cache
-      uses: actions/cache@v4
-      with:
-        path: /workdir/openwrt/staging_dir
-        key: ${{ runner.os }}-openwrt-staging-${{ hashFiles('/workdir/openwrt/include/toplevel.mk') }}
-        restore-keys: |
-          ${{ runner.os }}-openwrt-staging-
 
     - name: Load custom configuration
       run: |
@@ -122,8 +114,6 @@ jobs:
       id: package
       run: |
         cd openwrt
-        ./scripts/feeds update -a    # Actualiza feeds
-        ./scripts/feeds install -a   # Instala feeds
         # Resuelve las preguntas del kernel (como REALTEK_PHY) antes de la descarga
         yes "" | make defconfig
         make download -j8
@@ -135,6 +125,11 @@ jobs:
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
+        KDIR=$(ls -d build_dir/target-arm_fa526_musl_eabi/linux-gemini_generic/linux-6.* 2>/dev/null || true)
+        if [ -d "$KDIR" ]; then
+          echo "Configurando Kernel en $KDIR..."
+          yes "" | make -C "$KDIR" oldconfig
+        fi
         yes "" | make oldconfig
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
