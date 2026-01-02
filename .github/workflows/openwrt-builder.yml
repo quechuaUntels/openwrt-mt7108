@@ -108,6 +108,8 @@ jobs:
       id: package
       run: |
         cd openwrt
+        ./scripts/feeds update -a    # Actualiza feeds
+        ./scripts/feeds install -a   # Instala feeds
         # Resuelve las preguntas del kernel (como REALTEK_PHY) antes de la descarga
         yes "" | make target/linux/refresh
         make download -j8
