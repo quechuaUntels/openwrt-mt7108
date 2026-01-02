@@ -45,7 +45,8 @@ jobs:
             openwrt/build_dir/host
             openwrt/build_dir/toolchain-*
         # La clave cambia si modificas el seed.config o el SoC
-        key: ${{ runner.os }}-openwrt-toolchain-${{ hashFiles('seed.config') }}
+        key: ${{ runner.os }}-openwrt-toolchain-${{ hashFiles('recompile.sh') }}
+        # Esto permite que si no hay cambio en recompile.txt, use la última caché
         restore-keys: |
             ${{ runner.os }}-openwrt-toolchain-
             
