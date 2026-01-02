@@ -125,10 +125,15 @@ jobs:
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
+        make target/linux/prepare -j$(nproc)
         KDIR=$(ls -d build_dir/target-arm_fa526_musl_eabi/linux-gemini_generic/linux-6.* 2>/dev/null || true)
         if [ -d "$KDIR" ]; then
           echo "Configurando Kernel en $KDIR..."
           yes "" | make -C "$KDIR" oldconfig
+        else
+          echo "ADVERTENCIA: No se encontró la carpeta del kernel en build_dir. Esto podría causar un fallo de 'Broken Pipe' más adelante si el kernel 6.6 hace preguntas nuevas."
+          # Opcional: listar contenido para diagnóstico en el log
+          ls -R build_dir/target-arm_fa526_musl_eabi/ 2>/dev/null | head -n 20 || echo "build_dir está vacío."
         fi
         yes "" | make oldconfig
         make -j$(nproc) || make -j1 || make -j1 V=s
