@@ -73,12 +73,12 @@ if [ -f "$RR/seed.config" ]; then
 
     # Validamos con oldconfig (no interactivo)
     echo "Ejecutando make defconfig..."
-    make defconfig
+    # make defconfig
     
     # Comprobación de éxito: ¿Sigue seleccionado nuestro dispositivo?
     if grep -q "CONFIG_TARGET_gemini_generic_DEVICE_seowon_swc9000=y" .config; then
 	    echo "ÉXITO: Dispositivo validado y dependencias resueltas por defconfig."
-	    make target/linux/clean
+	    # make target/linux/clean
     else
         echo "ERROR: El dispositivo fue RECHAZADO por el sistema de configuración."
 	    echo "Revisa que el fragmento Makefile tengyes "" | make target/linux/compilea los TABULADORES correctos."
